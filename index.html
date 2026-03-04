@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CRYPTO FARMING</title>
+    <title>CRYPTO FARMING - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -12,237 +12,176 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        :root {
-            --tg-theme-bg-color: #0f172a;
-            --tg-theme-text-color: #ffffff;
-            --accent: #22c55e;
-        }
-        body {
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-            margin: 0;
-            padding: 0;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1.5rem;
-        }
-        /* Farming Animation: Falling Leaves/Coins */
-        @keyframes fall {
-            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
-        .leaf {
-            position: fixed;
-            top: -50px;
-            pointer-events: none;
-            animation: fall linear forwards;
-            z-index: 50;
-        }
-        .nav-btn { transition: all 0.3s; opacity: 0.6; }
+        :root { --tg-theme-bg-color: #0f172a; --tg-theme-text-color: #ffffff; --accent: #22c55e; }
+        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 1.2rem; }
+        .nav-btn { transition: all 0.3s; opacity: 0.5; text-align: center; font-size: 0.7rem; }
         .nav-btn.active { opacity: 1; color: var(--accent); transform: scale(1.1); }
         .hidden { display: none !important; }
-        .progress-fill { transition: width 1s linear; }
+        @keyframes fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+        .leaf { position: fixed; top: -50px; pointer-events: none; animation: fall linear forwards; z-index: 50; }
+        .admin-section { border-bottom: 1px solid #334155; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
     </style>
 </head>
 <body class="pb-24">
 
     <div id="userPanel" class="hidden p-4">
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-2 glass-card px-4 py-2">
-                <span>💰</span>
-                <span id="userBalance" class="font-bold text-lg">0</span>
+        <div class="flex justify-between items-center mb-6 glass-card p-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">💰</span>
+                <span id="userBalance" class="font-bold text-lg text-green-400">0</span>
             </div>
-            <div class="flex items-center gap-3">
-                <span id="userName" class="text-sm font-medium">User</span>
-                <img id="userPic" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full border-2 border-green-500">
+            <div class="flex items-center gap-2">
+                <div class="text-right">
+                    <p id="userName" class="text-xs font-bold truncate w-20">User</p>
+                    <p class="text-[10px] text-gray-400">LVL <span id="userLevel">1</span></p>
+                </div>
+                <img id="userPic" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full border border-green-500">
             </div>
         </div>
 
-        <section id="farmingTab" class="tab-content">
-            <div class="text-center relative py-10">
-                <div id="levelUp" class="hidden absolute top-0 left-1/2 -translate-x-1/2 bg-yellow-500 text-black px-6 py-2 rounded-full font-bold shadow-lg z-50">
-                    🎉 LEVEL UP!
-                </div>
-
-                <div class="relative inline-block mb-8">
-                    <img src="https://envs.sh/Gt3.jpg/IMG2025092696.jpg" class="w-48 h-48 rounded-full shadow-[0_0_50px_rgba(34,197,94,0.3)] mx-auto" alt="Logo">
-                </div>
-
-                <div class="glass-card p-6 mt-4">
-                    <div class="flex justify-between mb-2 text-sm">
+        <section id="farmingTab" class="tab-content text-center">
+            <div class="relative py-8">
+                <img src="https://envs.sh/Gt3.jpg/IMG2025092696.jpg" class="w-44 h-44 rounded-full mx-auto shadow-[0_0_40px_rgba(34,197,94,0.3)] border-4 border-green-500/20">
+                <div class="glass-card p-5 mt-8">
+                    <div class="flex justify-between text-xs mb-2 text-gray-400">
                         <span>Farming Progress</span>
                         <span id="farmingTimeLeft">24:00:00</span>
                     </div>
-                    <div class="w-full bg-gray-700 h-4 rounded-full overflow-hidden">
-                        <div id="progressBar" class="bg-green-500 h-full progress-fill w-0"></div>
+                    <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                        <div id="progressBar" class="bg-green-500 h-full w-0 transition-all"></div>
                     </div>
-                    <button id="startFarmingBtn" onclick="startFarming()" class="w-full mt-6 bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform">
-                        🍁 START FARMING
-                    </button>
-                    <p class="text-xs text-gray-400 mt-4">Earn 100 coins per min for 24 hours</p>
+                    <button id="startFarmingBtn" onclick="startFarming()" class="w-full mt-6 bg-green-600 hover:bg-green-500 py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">🍁 START FARMING</button>
                 </div>
             </div>
         </section>
 
         <section id="tasksTab" class="tab-content hidden">
-            <h2 class="text-xl font-bold mb-4">Available Tasks</h2>
-            <div id="taskList" class="space-y-4">
+            <h2 class="text-lg font-bold mb-4">Earn Extra Coins</h2>
+            <div id="taskList" class="space-y-3">
                 </div>
-        </section>
-
-        <section id="referralTab" class="tab-content hidden">
-            <div class="glass-card p-6 text-center">
-                <h3 class="text-lg font-bold">Invite Friends</h3>
-                <p class="text-sm text-gray-400 mb-4">Get <span id="refRewardAmt">500</span> coins per invite</p>
-                <div class="bg-black/30 p-3 rounded-lg text-xs break-all mb-4" id="refLink">Loading...</div>
-                <button onclick="copyRefLink()" class="bg-blue-600 px-4 py-2 rounded-lg">Copy Link</button>
-            </div>
-            <div class="mt-6">
-                <h4 class="font-bold mb-2">Referral History</h4>
-                <div id="refHistory" class="text-sm space-y-2"></div>
-            </div>
         </section>
 
         <section id="exchangeTab" class="tab-content hidden">
-            <div class="glass-card p-6 mb-4">
-                <h3 class="font-bold mb-4">Exchange Coins</h3>
-                <input type="number" id="coinInput" placeholder="Enter coins" class="w-full bg-black/40 border border-white/10 p-3 rounded-lg mb-4">
-                <button onclick="calculateExchange()" class="w-full bg-green-600 py-3 rounded-lg font-bold">Calculate INR/USDT</button>
-                <p id="exchangeResult" class="mt-2 text-center text-sm font-bold text-green-400"></p>
-            </div>
-            <div class="glass-card p-6">
-                <h3 class="font-bold mb-2">Withdraw</h3>
-                <select id="withdrawMethod" class="w-full bg-black/40 p-3 rounded-lg mb-4 border border-white/10">
-                    <option value="UPI">UPI</option>
-                    <option value="USDT">USDT (TRC20)</option>
-                </select>
-                <input type="text" id="walletAddress" placeholder="UPI ID or Wallet Address" class="w-full bg-black/40 border border-white/10 p-3 rounded-lg mb-4">
-                <button onclick="requestWithdrawal()" class="w-full bg-blue-600 py-3 rounded-lg font-bold">Submit Request</button>
-            </div>
-        </section>
-
-        <section id="profileTab" class="tab-content hidden">
-            <div class="glass-card p-6 text-center">
-                <img id="profilePicLarge" src="" class="w-24 h-24 rounded-full mx-auto border-4 border-green-500 mb-4">
-                <h2 id="profileName" class="text-xl font-bold">User Name</h2>
-                <p class="text-sm text-gray-400 mb-6">User ID: <span id="profileID">0000</span></p>
-                <div class="grid grid-cols-2 gap-4 text-left">
-                    <div class="bg-black/20 p-3 rounded-lg">
-                        <div class="text-xs text-gray-400">Total Coins</div>
-                        <div id="statCoins" class="font-bold">0</div>
-                    </div>
-                    <div class="bg-black/20 p-3 rounded-lg">
-                        <div class="text-xs text-gray-400">Referrals</div>
-                        <div id="statRefs" class="font-bold">0</div>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6">
-                <h4 class="font-bold mb-2">Withdrawal History</h4>
-                <div id="withdrawHistory" class="space-y-2 text-xs"></div>
+            <div class="glass-card p-5 mb-4 text-center">
+                <h3 class="font-bold mb-3">Withdraw Coins</h3>
+                <p class="text-xs text-gray-400 mb-4">1000 Coins = <span id="convRateDisp">₹80</span></p>
+                <input type="number" id="coinInput" placeholder="Enter Coins" class="w-full bg-black/40 border border-white/10 p-3 rounded-lg mb-4 text-white">
+                <select id="withdrawMethod" class="w-full bg-black/40 p-3 rounded-lg mb-4 border border-white/10 text-white">
+                    </select>
+                <input type="text" id="walletAddress" placeholder="Payment Details (UPI/Address)" class="w-full bg-black/40 border border-white/10 p-3 rounded-lg mb-4 text-white">
+                <button onclick="requestWithdrawal()" class="w-full bg-blue-600 py-3 rounded-lg font-bold">Request Cashout</button>
             </div>
         </section>
 
         <nav class="fixed bottom-0 left-0 right-0 glass-card mx-4 mb-4 flex justify-around p-3 z-50">
-            <button onclick="showTab('farmingTab')" class="nav-btn active">🍁<br><span class="text-[10px]">Farm</span></button>
-            <button onclick="showTab('tasksTab')" class="nav-btn">📝<br><span class="text-[10px]">Tasks</span></button>
-            <button onclick="showTab('referralTab')" class="nav-btn">👥<br><span class="text-[10px]">Refs</span></button>
-            <button onclick="showTab('exchangeTab')" class="nav-btn">🏦<br><span class="text-[10px]">Cash</span></button>
-            <button onclick="showTab('profileTab')" class="nav-btn">👤<br><span class="text-[10px]">Profile</span></button>
+            <button onclick="showTab('farmingTab', this)" class="nav-btn active">🍁<br>Farm</button>
+            <button onclick="showTab('tasksTab', this)" class="nav-btn">📝<br>Tasks</button>
+            <button onclick="showTab('exchangeTab', this)" class="nav-btn">🏦<br>Cash</button>
         </nav>
     </div>
 
-    <div id="adminPanel" class="hidden min-h-screen bg-slate-900 p-6">
-        <div id="adminLogin" class="max-w-md mx-auto mt-20 glass-card p-8">
-            <h1 class="text-2xl font-bold mb-6">Admin Portal</h1>
-            <input type="email" id="adminEmail" placeholder="Email" class="w-full bg-slate-800 p-3 rounded mb-4 outline-none border border-slate-700">
-            <input type="password" id="adminPass" placeholder="Password" class="w-full bg-slate-800 p-3 rounded mb-6 outline-none border border-slate-700">
-            <button onclick="adminLogin()" class="w-full bg-indigo-600 py-3 rounded font-bold">Login</button>
+    <div id="adminPanel" class="hidden min-h-screen bg-slate-900 p-4 text-sm">
+        <div id="adminLogin" class="max-w-md mx-auto mt-10 glass-card p-6">
+            <h1 class="text-xl font-bold mb-4">Admin Access</h1>
+            <input type="email" id="adminEmail" placeholder="Email" class="w-full bg-slate-800 p-3 rounded mb-3 border border-slate-700 outline-none">
+            <input type="password" id="adminPass" placeholder="Password" class="w-full bg-slate-800 p-3 rounded mb-4 border border-slate-700 outline-none">
+            <button onclick="adminLogin()" class="w-full bg-indigo-600 py-3 rounded font-bold">Verify Identity</button>
         </div>
 
         <div id="adminDashboard" class="hidden">
-            <header class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-bold">Admin Controls</h1>
+            <div class="flex justify-between items-center mb-6 bg-slate-800 p-3 rounded-lg">
+                <h2 class="font-bold">ADMIN CONSOLE</h2>
                 <button onclick="logout()" class="text-red-400">Logout</button>
-            </header>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass-card p-6">
-                    <h2 class="font-bold mb-4">Withdrawal Requests</h2>
-                    <div id="adminWithdrawals" class="space-y-4"></div>
-                </div>
-                <div class="glass-card p-6">
-                    <h2 class="font-bold mb-4">Global Settings</h2>
-                    <div class="space-y-4">
-                        <label class="block text-sm">Farming Rate (coins/min) <input type="number" id="setRate" class="w-full bg-black/30 p-2 rounded"></label>
-                        <label class="block text-sm">Conv Rate (1000 coins = ?) <input type="number" id="setConv" class="w-full bg-black/30 p-2 rounded"></label>
-                        <button onclick="updateSettings()" class="bg-green-600 px-4 py-2 rounded">Save Settings</button>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="text-indigo-400 font-bold mb-3">👤 User Management</h3>
+                <input type="text" id="searchUid" placeholder="User ID" class="bg-slate-800 p-2 rounded mr-2">
+                <button onclick="findUser()" class="bg-slate-700 px-3 py-2 rounded">Find</button>
+                <div id="userDetails" class="mt-3 hidden bg-slate-800 p-3 rounded">
+                    <p id="detName"></p>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="editCoins(1000)" class="bg-green-700 px-2 py-1 rounded">+1k</button>
+                        <button onclick="editCoins(-1000)" class="bg-red-700 px-2 py-1 rounded">-1k</button>
+                        <button id="banBtn" onclick="toggleBan()" class="bg-orange-700 px-2 py-1 rounded">Ban</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="text-indigo-400 font-bold mb-3">💰 Pending Withdrawals</h3>
+                <div id="adminWithdrawals" class="space-y-3"></div>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="text-indigo-400 font-bold mb-3">📝 Add Task</h3>
+                <input type="text" id="taskTitle" placeholder="Task Name (e.g. Sub YouTube)" class="w-full bg-slate-800 p-2 rounded mb-2">
+                <input type="text" id="taskLink" placeholder="Link" class="w-full bg-slate-800 p-2 rounded mb-2">
+                <input type="number" id="taskReward" placeholder="Reward Coins" class="w-full bg-slate-800 p-2 rounded mb-2">
+                <button onclick="addTask()" class="bg-blue-600 w-full py-2 rounded">Add New Task</button>
+            </div>
+            
+            <div class="admin-section">
+                <h3 class="text-indigo-400 font-bold mb-3">⚙️ Settings</h3>
+                <label>Methods (comma separated): <input type="text" id="setMethods" class="w-full bg-slate-800 p-2 rounded"></label>
+                <button onclick="updateSettings()" class="bg-green-600 w-full py-2 mt-2 rounded">Save Settings</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
-  apiKey: "AIzaSyBVkm1puprYba5H88QWwMH-z1pKRx8QpWo",
-  authDomain: "telegram-web-bot-app.firebaseapp.com",
-  projectId: "telegram-web-bot-app",
-  storageBucket: "telegram-web-bot-app.firebasestorage.app",
-  messagingSenderId: "251843820999",
-  appId: "1:251843820999:web:771cbc41398523969d2de2"
-};
+            apiKey: "AIzaSyBVkm1puprYba5H88QWwMH-z1pKRx8QpWo",
+            authDomain: "telegram-web-bot-app.firebaseapp.com",
+            projectId: "telegram-web-bot-app",
+            storageBucket: "telegram-web-bot-app.firebasestorage.app",
+            messagingSenderId: "251843820999",
+            appId: "1:251843820999:web:771cbc41398523969d2de2"
+        };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
         const tg = window.Telegram.WebApp;
-        const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN";
 
-        // Global State
-        let userData = {
-            coins: 0,
-            xp: 0,
-            level: 1,
-            isFarming: false,
-            lastFarmStart: null,
-            referrals: [],
-            withdrawals: []
-        };
-        let globalSettings = { rate: 100, duration: 24, conv: 80 };
+        let userData = { coins: 0, xp: 0, level: 1, isFarming: false, lastFarmStart: null, uid: null, isBanned: false };
+        let settings = { methods: "UPI,USDT,Paytm", rate: 100, conv: 80 };
+        let currentEditingUser = null;
 
         // --- CORE LOGIC ---
-
         function initApp() {
-            // WebApp Detection
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 document.getElementById('userPanel').classList.remove('hidden');
                 loadUserData(tg.initDataUnsafe.user.id);
-                initFarmingLoop();
+                loadSettings();
+                loadTasks();
             } else {
                 document.getElementById('adminPanel').classList.remove('hidden');
             }
             tg.expand();
+            initFarmingLoop();
+        }
+
+        async function loadSettings() {
+            const doc = await db.collection('settings').doc('global').get();
+            if(doc.exists) {
+                settings = doc.data();
+                document.getElementById('convRateDisp').innerText = `₹${settings.conv}`;
+                const mSelect = document.getElementById('withdrawMethod');
+                mSelect.innerHTML = settings.methods.split(',').map(m => `<option value="${m}">${m}</option>`).join('');
+            }
         }
 
         async function loadUserData(uid) {
-            // LocalStorage Check
-            const local = localStorage.getItem(`crypto_farm_${uid}`);
-            if(local) userData = JSON.parse(local);
-
-            // Firebase Sync
             const doc = await db.collection('users').doc(uid.toString()).get();
             if(doc.exists) {
                 userData = doc.data();
-                localStorage.setItem(`crypto_farm_${uid}`, JSON.stringify(userData));
+                if(userData.isBanned) {
+                    document.body.innerHTML = "<h1 class='text-center mt-20 text-red-500'>YOU ARE BANNED!</h1>";
+                    return;
+                }
             } else {
-                // New User init
                 userData.uid = uid;
                 userData.name = tg.initDataUnsafe.user.first_name;
                 await db.collection('users').doc(uid.toString()).set(userData);
@@ -253,22 +192,17 @@
         function updateUI() {
             document.getElementById('userBalance').innerText = Math.floor(userData.coins);
             document.getElementById('userName').innerText = userData.name || "User";
-            document.getElementById('profileName').innerText = userData.name || "User";
-            document.getElementById('profileID').innerText = userData.uid || "0";
-            document.getElementById('statCoins').innerText = Math.floor(userData.coins);
-            document.getElementById('refLink').innerText = `https://t.me/Finisher_farming_bot?start=${userData.uid}`;
-            
+            document.getElementById('userLevel').innerText = userData.level;
             if(userData.isFarming) {
+                document.getElementById('startFarmingBtn').innerText = "FARMING...";
                 document.getElementById('startFarmingBtn').disabled = true;
-                document.getElementById('startFarmingBtn').innerText = "FARMING IN PROGRESS...";
                 startLeafAnimation();
             }
         }
 
-        // --- FARMING ENGINE ---
+        // --- FARMING ---
         function startFarming() {
             if(userData.isFarming) return;
-            
             userData.isFarming = true;
             userData.lastFarmStart = Date.now();
             saveData();
@@ -279,80 +213,74 @@
             setInterval(() => {
                 if(userData.isFarming) {
                     const elapsed = Date.now() - userData.lastFarmStart;
-                    const totalDuration = 24 * 60 * 60 * 1000;
-                    
-                    if(elapsed >= totalDuration) {
-                        finishFarming();
+                    const duration = 24 * 60 * 60 * 1000;
+                    if(elapsed >= duration) {
+                        userData.isFarming = false;
+                        userData.coins += (24 * 60 * settings.rate);
+                        saveData();
+                        updateUI();
+                        stopLeafAnimation();
+                        alert("Farming Done!");
                     } else {
-                        const progress = (elapsed / totalDuration) * 100;
-                        document.getElementById('progressBar').style.width = `${progress}%`;
-                        
-                        // Remaining Time String
-                        const remaining = totalDuration - elapsed;
-                        const h = Math.floor(remaining / 3600000);
-                        const m = Math.floor((remaining % 3600000) / 60000);
-                        const s = Math.floor((remaining % 60000) / 1000);
-                        document.getElementById('farmingTimeLeft').innerText = `${h}:${m}:${s}`;
+                        document.getElementById('progressBar').style.width = (elapsed / duration * 100) + "%";
+                        const rem = duration - elapsed;
+                        const h = Math.floor(rem/3600000);
+                        const m = Math.floor((rem%3600000)/60000);
+                        document.getElementById('farmingTimeLeft').innerText = `${h}h ${m}m left`;
                     }
                 }
             }, 1000);
         }
 
-        function finishFarming() {
-            userData.isFarming = false;
-            userData.coins += (24 * 60 * globalSettings.rate);
-            userData.xp += 100;
-            checkLevelUp();
-            stopLeafAnimation();
+        // --- TASKS ---
+        async function loadTasks() {
+            const snap = await db.collection('tasks').get();
+            const list = document.getElementById('taskList');
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                const t = doc.data();
+                list.innerHTML += `
+                    <div class="glass-card p-4 flex justify-between items-center">
+                        <div><p class="font-bold">${t.title}</p><p class="text-xs text-green-400">+${t.reward} Coins</p></div>
+                        <button onclick="doTask('${t.link}', '${doc.id}', ${t.reward})" class="bg-indigo-600 px-4 py-2 rounded text-xs">Join</button>
+                    </div>`;
+            });
+        }
+
+        function doTask(link, id, reward) {
+            window.open(link, '_blank');
+            setTimeout(async () => {
+                userData.coins += reward;
+                saveData();
+                updateUI();
+                alert("Reward Claimed!");
+            }, 5000);
+        }
+
+        // --- WITHDRAW ---
+        async function requestWithdrawal() {
+            const coins = parseInt(document.getElementById('coinInput').value);
+            const addr = document.getElementById('walletAddress').value;
+            const method = document.getElementById('withdrawMethod').value;
+            
+            if(coins > userData.coins || coins < 1000) return alert("Min 1000 coins required!");
+            
+            userData.coins -= coins;
+            await db.collection('withdrawals').add({
+                uid: userData.uid,
+                name: userData.name,
+                coins: coins,
+                address: addr,
+                method: method,
+                status: "Pending",
+                date: Date.now()
+            });
             saveData();
             updateUI();
-            alert("Farming Complete! Reward Claimed.");
+            alert("Request Sent!");
         }
 
-        function checkLevelUp() {
-            const threshold = userData.level * 500;
-            if(userData.xp >= threshold) {
-                userData.level++;
-                confetti();
-                document.getElementById('levelUp').classList.remove('hidden');
-                setTimeout(() => document.getElementById('levelUp').classList.add('hidden'), 3000);
-            }
-        }
-
-        // --- ANIMATIONS ---
-        let leafInterval;
-        function startLeafAnimation() {
-            leafInterval = setInterval(() => {
-                const leaf = document.createElement('div');
-                leaf.className = 'leaf';
-                leaf.innerHTML = '🍁';
-                leaf.style.left = Math.random() * 100 + 'vw';
-                leaf.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                leaf.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                document.body.appendChild(leaf);
-                setTimeout(() => leaf.remove(), 5000);
-            }, 300);
-        }
-
-        function stopLeafAnimation() {
-            clearInterval(leafInterval);
-        }
-
-        // --- DATA PERSISTENCE ---
-        async function saveData() {
-            localStorage.setItem(`crypto_farm_${userData.uid}`, JSON.stringify(userData));
-            await db.collection('users').doc(userData.uid.toString()).update(userData);
-        }
-
-        // --- NAVIGATION ---
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-        }
-
-        // --- ADMIN PORTAL LOGIC ---
+        // --- ADMIN FUNCTIONS ---
         async function adminLogin() {
             const email = document.getElementById('adminEmail').value;
             const pass = document.getElementById('adminPass').value;
@@ -360,20 +288,95 @@
                 await auth.signInWithEmailAndPassword(email, pass);
                 document.getElementById('adminLogin').classList.add('hidden');
                 document.getElementById('adminDashboard').classList.remove('hidden');
-                loadAdminData();
-            } catch(e) { alert("Invalid Admin Credentials"); }
+                loadAdminWithdrawals();
+            } catch(e) { alert("Wrong credentials!"); }
         }
 
-        // Initialize on load
+        async function loadAdminWithdrawals() {
+            const snap = await db.collection('withdrawals').where("status", "==", "Pending").get();
+            const container = document.getElementById('adminWithdrawals');
+            container.innerHTML = "";
+            snap.forEach(doc => {
+                const w = doc.data();
+                container.innerHTML += `
+                    <div class="bg-slate-800 p-3 rounded">
+                        <p>User: ${w.name} (${w.coins} coins)</p>
+                        <p class="text-[10px] text-gray-400">Method: ${w.method} | Addr: ${w.address}</p>
+                        <div class="flex gap-2 mt-2">
+                            <button onclick="processWithdraw('${doc.id}', 'Approved')" class="bg-green-600 px-2 py-1 rounded">Approve</button>
+                            <button onclick="processWithdraw('${doc.id}', 'Rejected')" class="bg-red-600 px-2 py-1 rounded">Reject</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function processWithdraw(id, status) {
+            await db.collection('withdrawals').doc(id).update({ status: status });
+            loadAdminWithdrawals();
+        }
+
+        async function findUser() {
+            const uid = document.getElementById('searchUid').value;
+            const doc = await db.collection('users').doc(uid).get();
+            if(doc.exists) {
+                currentEditingUser = doc.data();
+                document.getElementById('userDetails').classList.remove('hidden');
+                document.getElementById('detName').innerText = `${currentEditingUser.name} | 💰 ${currentEditingUser.coins}`;
+                document.getElementById('banBtn').innerText = currentEditingUser.isBanned ? "Unban" : "Ban";
+            }
+        }
+
+        async function editCoins(amt) {
+            currentEditingUser.coins += amt;
+            await db.collection('users').doc(currentEditingUser.uid.toString()).update({ coins: currentEditingUser.coins });
+            findUser();
+        }
+
+        async function toggleBan() {
+            currentEditingUser.isBanned = !currentEditingUser.isBanned;
+            await db.collection('users').doc(currentEditingUser.uid.toString()).update({ isBanned: currentEditingUser.isBanned });
+            findUser();
+        }
+
+        async function addTask() {
+            const t = document.getElementById('taskTitle').value;
+            const l = document.getElementById('taskLink').value;
+            const r = parseInt(document.getElementById('taskReward').value);
+            await db.collection('tasks').add({ title: t, link: l, reward: r });
+            alert("Task Added!");
+        }
+
+        async function updateSettings() {
+            const meth = document.getElementById('setMethods').value;
+            await db.collection('settings').doc('global').set({ methods: meth, rate: 100, conv: 80 });
+            alert("Settings Updated!");
+        }
+
+        // --- HELPERS ---
+        function showTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function logout() { auth.signOut(); location.reload(); }
+        async function saveData() { await db.collection('users').doc(userData.uid.toString()).set(userData); }
+        
+        let leafInterval;
+        function startLeafAnimation() {
+            leafInterval = setInterval(() => {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf'; leaf.innerHTML = '🍁';
+                leaf.style.left = Math.random() * 100 + 'vw';
+                leaf.style.animationDuration = '3s';
+                document.body.appendChild(leaf);
+                setTimeout(() => leaf.remove(), 3000);
+            }, 400);
+        }
+        function stopLeafAnimation() { clearInterval(leafInterval); }
+
         window.onload = initApp;
-
-        // UI Helpers
-        function copyRefLink() {
-            const link = document.getElementById('refLink').innerText;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Referral link copied!");
-        }
-
     </script>
 </body>
 </html>
